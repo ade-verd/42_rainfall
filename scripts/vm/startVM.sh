@@ -32,5 +32,5 @@ if [ -z "$VM_IP" ]; then
 fi
 
 echo -e "You should set its IP as environment variable\n"
-echo "export SNOW_HOST=$VM_IP"
-echo "export SNOW_PORT=$VM_PORT"
+echo "export RF_HOST=$VM_IP"
+echo "export RF_PORT=$VM_PORT"
