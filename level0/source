@@ -1,13 +1,25 @@
-#include <stdio.h>  // stderr
-#include <stdlib.h> // atoi
-#include <string.h> // strdup
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#define _GNU_SOURCE
 
 int main(int argc, char **argv)
 {
-    char *copy;
+    char **cmd_args;
+    uid_t uid;
+    gid_t gid;
+
     if (atoi(argv[1]) == 423)
     {
-        *copy = strdup();
+        cmd_args[0] = strdup("/bin/sh");
+        cmd_args[1] = '\0';
+        gid = getegid();
+        uid = geteuid();
+        setresgid(gid, gid, gid);
+        setresuid(uid, uid, uid);
+        execv(cmd_args[0], cmd_args);
     }
     else
         fwrite("No !\n", sizeof(char), 5, stderr);
@@ -21,14 +33,14 @@ int main(int argc, char **argv)
 //    0x08048ec9 <+9>:     mov    0xc(%ebp),%eax
 //    0x08048ecc <+12>:    add    $0x4,%eax
 //    0x08048ecf <+15>:    mov    (%eax),%eax
-//    0x08048ed1 <+17>:    mov    %eax,(%esp)
+//    0x08048ed1 <+17>:    mov    %eax,(%esp)               ; $eax contains argv[1]
 //    0x08048ed4 <+20>:    call   0x8049710 <atoi>          ; call atoi
 //    0x08048ed9 <+25>:    cmp    $0x1a7,%eax               ; compare eax with 423
 //    0x08048ede <+30>:    jne    0x8048f58 <main+152>      ; if not equal jump to line main+152
-//    0x08048ee0 <+32>:    movl   $0x80c5348,(%esp)
-//    0x08048ee7 <+39>:    call   0x8050bf0 <strdup>        ; call strdup
-//    0x08048eec <+44>:    mov    %eax,0x10(%esp)
-//    0x08048ef0 <+48>:    movl   $0x0,0x14(%esp)
+//    0x08048ee0 <+32>:    movl   $0x80c5348,(%esp)         ; p $0x80c5348 = "/bin/sh"
+//    0x08048ee7 <+39>:    call   0x8050bf0 <strdup>        ; call strdup("bin/sh")
+//    0x08048eec <+44>:    mov    %eax,0x10(%esp)           ; *char[0]    $esp+0x10 = "/bin/sh"
+//    0x08048ef0 <+48>:    movl   $0x0,0x14(%esp)           ; *char[1]    $esp+0x14 = '\0'
 //    0x08048ef8 <+56>:    call   0x8054680 <getegid>       ; call getegid
 //    0x08048efd <+61>:    mov    %eax,0x1c(%esp)
 //    0x08048f01 <+65>:    call   0x8054670 <geteuid>       ; call geteuid

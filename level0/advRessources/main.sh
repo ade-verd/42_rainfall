@@ -1,25 +1,22 @@
 #!/bin/bash
 
-LEVEL="14"
+LEVEL="0"
+NEXT_LEVEL=$(($LEVEL+1))
 
 CURDIR=`dirname "$(readlink -f "$0")"`
 
-PREV_LEVEL=`printf "%02d" $(($LEVEL-1))`
 USER="level$LEVEL"
-PW=`cat $CURDIR/../../level$PREV_LEVEL/flag`
+PASS="level0"
+NEXT_USER="level$NEXT_LEVEL"
+NEXT_PASS=`cat $CURDIR/../flag`
 
-if [ -z ${SNOW_HOST+x} ]; then read -p "VM Host: " SNOW_HOST; fi
-if [ -z ${SNOW_PORT+x} ]; then read -p "VM Port: " SNOW_PORT; fi
-
-# Then check flag on flag user
-FLAG_LEVEL="flag$LEVEL"
-FLAG_CONTENT=`cat $CURDIR/../flag`
+if [ -z ${RF_HOST+x} ]; then read -p "VM Host: " RF_HOST; fi
+if [ -z ${RF_PORT+x} ]; then read -p "VM Port: " RF_PORT; fi
 
 # Connect to level and run the script
-echo -e "$USER password is : $PW\n"
+echo -e "$USER password is: $PASS\n"
 (set -x
-ssh -t -q -p $SNOW_PORT $USER@$SNOW_HOST 'bash' < $CURDIR/script.sh)
-# ssh -t -q -p $SNOW_PORT $USER@$SNOW_HOST)
+ssh -t -q -p $RF_PORT $USER@$RF_HOST 'bash' < $CURDIR/script.sh)
 
 # Check flag password and token
-echo -e "\nExpected flag: $FLAG_CONTENT"
+echo -e "\nExpected flag: $NEXT_PASS"

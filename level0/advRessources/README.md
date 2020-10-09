@@ -8,11 +8,10 @@ Usage: ./main.sh
 
 ## Passwords and token
 
-|        |          |
-| ------ | -------- |
-| level0 | `level0` |
-| flag0  | ``       |
-| token  | ``       |
+|        |                                                                    |
+| ------ | ------------------------------------------------------------------ |
+| level0 | `level0`                                                           |
+| level1 | `1fe8a524fa4bec01ca4ea2a869af2a02260d4a7d5fe7e7c24d8617e6dca12d3a` |
 
 ## Steps to resolve on VM
 
@@ -22,84 +21,94 @@ Usage: ./main.sh
 ssh level0@$SNOW_HOST -p 4242
 # Enter the password
 
-> GCC stack protector support:            Enabled
-  Strict user copy checks:                Disabled
-  Restrict /dev/mem access:               Enabled
-  Restrict /dev/kmem access:              Enabled
-  grsecurity / PaX: No GRKERNSEC
-  Kernel Heap Hardening: No KERNHEAP
-  System-wide ASLR (kernel.randomize_va_space): Off (Setting: 0)
-  RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      FILE
-  No RELRO        No canary found   NX enabled    No PIE          No RPATH   No RUNPATH   /home/user/level0/level0
+ls -l
+> -rwsr-x---+ 1 level1 users 747441 Mar  6  2016 level0
 ```
 
-As we can see, some scripts are executed at connection.
-We can see in `.bashrc` the following command: `checksec --file level0`
+Notice there is a binary with level1 setuid.
 
-## Notes
+2. Debug level0
 
-### Checksec
+Execute level0
 
-> _Modern Linux distributions offer some mitigation techniques to make it harder to exploit software vulnerabilities reliably. Mitigations such as RELRO, NoExecute (NX), Stack Canaries, Address Space Layout Randomization (ASLR) and Position Independent Executables (PIE) have made reliably exploiting any vulnerabilities that do exist far more challenging. The checksec.sh script is designed to test what standard Linux OS and PaX security features are being used._ (Source: trapkit.de)[http://www.trapkit.de/tools/checksec.html]
+```shell
+./level0
+> Segmentation fault (core dumped)
+```
 
----
+Argh segfault. Lets debug with gdb
 
-### System Protections
+```shell
+gdb level0
+(gdb) disas main
 
-#### **RELRO - Relocation Read-Only**
+> (...)
+  0x08048ed1 <+17>:    mov    %eax,(%esp)               ; $eax contains argv[1]
+  0x08048ed4 <+20>:    call   0x8049710 <atoi>          ; call atoi
+  0x08048ed9 <+25>:    cmp    $0x1a7,%eax               ; compare eax with 423
+  (...)
+```
 
-Relocation Read-Only (or RELRO) is a security measure which makes some binary sections read-only.
-[Source](https://ctf101.org/binary-exploitation/relocation-read-only/)
+The segfault seems come from `atoi`
+As atoi is espected one \*(char), maybe level0 takes one argument.
 
----
+```shell
+(gdb) set args helloworld
+(gdb) break atoi
+(gdb) run
+(gdb) x /s $eax
+> 0xbffff833:      "helloworld"
+# atoi expects argv[1]
 
-#### **Stack Canary**
+# The value 0x1a7 is expected
+(gdb) print 0x1a7
+> $1 = 423
+```
 
-Stack canaries, named for their analogy to a canary in a coal mine, are used to detect a stack buffer overflow before execution of malicious code can occur.
-[Source](https://en.wikipedia.org/wiki/Stack_buffer_overflow#Stack_canaries)
+The string expected by atoi is the first argument (argv[1]).
 
----
+After atoi syscall, the program compares the register \$eax with the value 0x1a7 (423 in decimal).
 
-#### **NX - No execution bit**
+Then:
 
-The NX bit (no-execute) is a technology used in CPUs to segregate areas of memory for use by either storage of processor instructions (code) or for storage of data, a feature normally only found in Harvard architecture processors.
-[Source](https://en.wikipedia.org/wiki/NX_Bit)
+```bash
+(gdb) disas main
+> (...) 0x08048ef8 <+56>:    call   0x8054680 <getegid>       ; call getegid
+  (...) 0x08048f01 <+65>:    call   0x8054670 <geteuid>       ; call geteuid
+  (...) 0x08048f21 <+97>:    call   0x8054700 <setresgid>     ; call setresgid
+  (...) 0x08048f3d <+125>:   call   0x8054690 <setresuid>     ; call setresuid
+  (...) 0x08048f51 <+145>:   call   0x8054640 <execv>         ; call execv
+  (...)
+```
 
----
+Effectives GID and UID are gotten and set
 
-#### **PIE - Position Independant Executables**
+A sub program is launch with `"/bin/sh"` as command, with `["/bin/sh", '\0']` as arguments.
 
-In computing, position-independent code (PIC) or position-independent executable (PIE) is a body of machine code that, being placed somewhere in the primary memory, executes properly regardless of its absolute address. PIC is commonly used for shared libraries, so that the same library code can be loaded in a location in each program address space where it will not overlap any other uses of memory (for example, other shared libraries).
-[Source](https://en.wikipedia.org/wiki/Position-independent_code)
+```gdb
+  0x08048eec <+44>:    mov    %eax,0x10(%esp)           ; *char[0]    $esp+0x10 = "/bin/sh"
+  0x08048ef0 <+48>:    movl   $0x0,0x14(%esp)           ; *char[1]    $esp+0x14 = '\0'
+```
 
----
+Then We can take advantage of level1 setuid permission.
 
-#### **RPath (Run-time seach path)**
+3. Get next level password
 
-In computing, rpath designates the run-time search path hard-coded in an executable file or library. Dynamic linking loaders use the rpath to find required libraries.<br />Specifically, it encodes a path to shared libraries into the header of an executable (or another shared library). This RPATH header value (so named in the Executable and Linkable Format header standards) may either override or supplement the system default dynamic linking search paths.
-[Source](https://en.wikipedia.org/wiki/Rpath)
+```shell
+~/level0 423
+$ id
+> uid=2030(level1) gid=2020(level0) groups=2030(level1),100(users),2020(level0)
+# Because of setuid bit, we have level1's UID
 
----
-
-#### **RunPath**
-
-The only difference between rpath and runpath is the order they are searched in. Specifically, their relation to LD_LIBRARY_PATH - rpath is searched in before LD_LIBRARY_PATH while runpath is searched in after. The meaning of this is that rpath cannot be changed dynamically with environment variables while runpath can.
-[Source](https://amir.rachum.com/blog/2016/09/17/shared-libraries/)
+$ cat /home/user/level1/.pass
+1fe8a524fa4bec01ca4ea2a869af2a02260d4a7d5fe7e7c24d8617e6dca12d3a
+```
 
 ---
 
 ## Sources
 
-- [Checksec.sh script](http://www.trapkit.de/tools/checksec.html)
-- [NX (No Execution) Bit](https://en.wikipedia.org/wiki/NX_Bit)
-- [Stack buffer overflow](https://en.wikipedia.org/wiki/Stack_buffer_overflow)
-- [Stack Canaries](https://en.wikipedia.org/wiki/Stack_buffer_overflow#Stack_canaries)
-- [PIC/PIE - Position independent code](https://en.wikipedia.org/wiki/Position-independent_code)
-- [Rpath](https://en.wikipedia.org/wiki/Rpath)
-- [Shared Libraries](https://amir.rachum.com/blog/2016/09/17/shared-libraries/)
+- [x86 assenbly language syntax](https://en.wikipedia.org/wiki/X86_assembly_language#Syntax)
+- [gdb cheat sheet](https://darkdust.net/files/GDB%20Cheat%20Sheet.pdf)
 
-- [FR - Le monde du Kernel - Partie 1](https://beta.hackndo.com/le-monde-du-kernel/)
-- [FR - Le monde du Kernel - Partie 2 - Les failles](https://beta.hackndo.com/les-failles-kernel/)
-- [FR - Le monde du Kerner - Partie 3 - Rappel d'architecture](https://beta.hackndo.com/rappels-d-architecture/)
-- [FR - Technique du Canari : Bypass](https://beta.hackndo.com/technique-du-canari-bypass/)
 - [FR - Introduction à gdb](https://beta.hackndo.com/introduction-a-gdb/)
