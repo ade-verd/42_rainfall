@@ -1,20 +1,20 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-#define _GNU_SOURCE
 
 int main(int argc, char **argv)
 {
-    char **cmd_args;
+    char *cmd_args[2];
     uid_t uid;
     gid_t gid;
 
     if (atoi(argv[1]) == 423)
     {
         cmd_args[0] = strdup("/bin/sh");
-        cmd_args[1] = '\0';
+        cmd_args[1] = NULL;
         gid = getegid();
         uid = geteuid();
         setresgid(gid, gid, gid);
@@ -39,10 +39,10 @@ int main(int argc, char **argv)
 //    0x08048ede <+30>:    jne    0x8048f58 <main+152>      ; if not equal jump to line main+152
 //    0x08048ee0 <+32>:    movl   $0x80c5348,(%esp)         ; p $0x80c5348 = "/bin/sh"
 //    0x08048ee7 <+39>:    call   0x8050bf0 <strdup>        ; call strdup("bin/sh")
-//    0x08048eec <+44>:    mov    %eax,0x10(%esp)           ; *char[0]    $esp+0x10 = "/bin/sh"
+//    0x08048eec <+44>:    mov    %eax,0x10(%esp)          execv ; *char[0]    $esp+0x10 = "/bin/sh"
 //    0x08048ef0 <+48>:    movl   $0x0,0x14(%esp)           ; *char[1]    $esp+0x14 = '\0'
 //    0x08048ef8 <+56>:    call   0x8054680 <getegid>       ; call getegid
-//    0x08048efd <+61>:    mov    %eax,0x1c(%esp)
+//    0x08048efd <+61>:    mov    %eax,0x1c(%esp)execv
 //    0x08048f01 <+65>:    call   0x8054670 <geteuid>       ; call geteuid
 //    0x08048f06 <+70>:    mov    %eax,0x18(%esp)
 //    0x08048f0a <+74>:    mov    0x1c(%esp),%eax
