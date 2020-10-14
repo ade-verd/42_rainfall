@@ -35,11 +35,11 @@ int main(void)
 // p
 //    0x080484d4 <+0>:     push   %ebp
 //    0x080484d5 <+1>:     mov    %esp,%ebp
-//    0x080484d7 <+3>:     sub    $0x68,%esp                # allocate 0x68bits (104)
+//    0x080484d7 <+3>:     sub    $0x68,%esp
 //    0x080484da <+6>:     mov    0x8049860,%eax            # 0x8049860 <stdout@@GLIBC_2.0>:   ""
 //    0x080484df <+11>:    mov    %eax,(%esp)
 //    0x080484e2 <+14>:    call   0x80483b0 <fflush@plt>    # call fflush(stdout)
-//    0x080484e7 <+19>:    lea    -0x4c(%ebp),%eax
+//    0x080484e7 <+19>:    lea    -0x4c(%ebp),%eax          # buffer start at -0x4c(%ebp)
 //    0x080484ea <+22>:    mov    %eax,(%esp)
 //    0x080484ed <+25>:    call   0x80483c0 <gets@plt>      # call gets(buff)
 //    0x080484f2 <+30>:    mov    0x4(%ebp),%eax
