@@ -18,7 +18,7 @@ Usage: ./main.sh
 1. Connect to `level1` user
 
 ```shell
-ssh level0@$SNOW_HOST -p 4242
+ssh level1@$SNOW_HOST -p 4242
 # Enter the password
 
 ls -l
