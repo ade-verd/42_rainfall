@@ -12,7 +12,8 @@ int main(void)
 {
     char buf[76];
 
-    return gets(buf);
+    gets(buf);
+    return 0;
 }
 
 // run
