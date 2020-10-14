@@ -52,7 +52,7 @@ int main(void)
 //    0x0804850c <+56>:    mov    -0xc(%ebp),%edx
 //    0x0804850f <+59>:    mov    %edx,0x4(%esp)
 //    0x08048513 <+63>:    mov    %eax,(%esp)
-//    0x08048516 <+66>:    call   0x80483a0 <printf@plt>    # call printf("(%p)\n", )
+//    0x08048516 <+66>:    call   0x80483a0 <printf@plt>    # call printf("(%p)\n", ptr)
 //    0x0804851b <+71>:    movl   $0x1,(%esp)
 //    0x08048522 <+78>:    call   0x80483d0 <_exit@plt>     # call _exit(1)
 //    0x08048527 <+83>:    lea    -0x4c(%ebp),%eax
