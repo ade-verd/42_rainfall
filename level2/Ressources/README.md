@@ -327,7 +327,3 @@ But at this moment, I don't really understood why it does not work with Nopsled.
 - [Man exit](https://linux.die.net/man/3/exit)
 - [Man puts](https://linux.die.net/man/3/puts)
 - [Man strdup](https://linux.die.net/man/3/strdup)
-
-```
-
-```
