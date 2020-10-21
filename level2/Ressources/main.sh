@@ -20,4 +20,4 @@ echo -e "$USER password is: $PASS\n"
 ssh -q -p $RF_PORT $USER@$RF_HOST 'bash' < $CURDIR/script.sh)
 
 # Check flag password and token
-echo -e "\nExpected flag: $NEXT_PASS"
+echo -e "Expected flag: $NEXT_PASS"
