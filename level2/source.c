@@ -1,17 +1,21 @@
+// 32bit, executable stack, no stack protector
+// gcc -m32 -g -z execstack -fno-stack-protector source.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 void p(void)
 {
-    char buf[100];
-    char *ptr;
+    char buf[64];
+    void *ret_address;
 
     fflush(stdout);
     gets(buf);
-    if (((unsigned int)ptr & 0xb0000000) == 0xb0000000)
+    ret_address = __builtin_return_address(0);
+    // printf("__builtin_return_address(0): %p\n", ret_address);
+    if (((unsigned int)ret_address & 0xb0000000) == 0xb0000000)
     {
-        printf("(%p\n)", ptr);
+        printf("(%p\n)", ret_address);
         exit(1);
     }
     puts(buf);
@@ -39,12 +43,12 @@ int main(void)
 //    0x080484da <+6>:     mov    0x8049860,%eax            # 0x8049860 <stdout@@GLIBC_2.0>:   ""
 //    0x080484df <+11>:    mov    %eax,(%esp)
 //    0x080484e2 <+14>:    call   0x80483b0 <fflush@plt>    # call fflush(stdout)
-//    0x080484e7 <+19>:    lea    -0x4c(%ebp),%eax          # buffer start at -0x4c(%ebp)
+//    0x080484e7 <+19>:    lea    -0x4c(%ebp),%eax          # buffer start at -0x4c(%ebp) => -76
 //    0x080484ea <+22>:    mov    %eax,(%esp)
 //    0x080484ed <+25>:    call   0x80483c0 <gets@plt>      # call gets(buff)
-//    0x080484f2 <+30>:    mov    0x4(%ebp),%eax
-//    0x080484f5 <+33>:    mov    %eax,-0xc(%ebp)
-//    0x080484f8 <+36>:    mov    -0xc(%ebp),%eax
+//    0x080484f2 <+30>:    mov    0x4(%ebp),%eax            # buf + 80 => $eax     (get return address)
+//    0x080484f5 <+33>:    mov    %eax,-0xc(%ebp)           # $eax     => buf + 64 (???)
+//    0x080484f8 <+36>:    mov    -0xc(%ebp),%eax           # buf + 64 => $eax     (???)
 //    0x080484fb <+39>:    and    $0xb0000000,%eax          # $eax = $0xb0000000 & $eax
 //    0x08048500 <+44>:    cmp    $0xb0000000,%eax          # compare $0xb0000000 and $eax
 //    0x08048505 <+49>:    jne    0x8048527 <p+83>          # if != jump to *p+83
@@ -57,9 +61,9 @@ int main(void)
 //    0x08048522 <+78>:    call   0x80483d0 <_exit@plt>     # call _exit(1)
 //    0x08048527 <+83>:    lea    -0x4c(%ebp),%eax
 //    0x0804852a <+86>:    mov    %eax,(%esp)
-//    0x0804852d <+89>:    call   0x80483f0 <puts@plt>      # call puts()
+//    0x0804852d <+89>:    call   0x80483f0 <puts@plt>      # call puts(buf)
 //    0x08048532 <+94>:    lea    -0x4c(%ebp),%eax
 //    0x08048535 <+97>:    mov    %eax,(%esp)
-//    0x08048538 <+100>:   call   0x80483e0 <strdup@plt>    # call strdup()
+//    0x08048538 <+100>:   call   0x80483e0 <strdup@plt>    # call strdup(buf)
 //    0x0804853d <+105>:   leave
 //    0x0804853e <+106>:   ret
