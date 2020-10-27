@@ -37,9 +37,9 @@ int main(void)
 //    0x080484a4 <+0>:     push   ebp
 //    0x080484a5 <+1>:     mov    ebp,esp
 //    0x080484a7 <+3>:     sub    esp,0x218
-//    0x080484ad <+9>:     mov    eax,ds:0x8049860                  0x8049860 <stdin@@GLIBC_2.0>
-//    0x080484b2 <+14>:    mov    DWORD PTR [esp+0x8],eax           buffer starts at esp+0x8
-//    0x080484b6 <+18>:    mov    DWORD PTR [esp+0x4],0x200         fgets maxLength = 0x200 (512)
+//    0x080484ad <+9>:     mov    eax,ds:0x8049860                  # 0x8049860 <stdin@@GLIBC_2.0>
+//    0x080484b2 <+14>:    mov    DWORD PTR [esp+0x8],eax           # buffer starts at esp+0x8
+//    0x080484b6 <+18>:    mov    DWORD PTR [esp+0x4],0x200         # fgets maxLength = 0x200 (512)
 //    0x080484be <+26>:    lea    eax,[ebp-0x208]
 //    0x080484c4 <+32>:    mov    DWORD PTR [esp],eax
 //    0x080484c7 <+35>:    call   0x80483a0 <fgets@plt>             # call fgets(buf, 0x200, stdin)
@@ -49,7 +49,7 @@ int main(void)
 //    0x080484da <+54>:    mov    eax,ds:0x804988c
 //    0x080484df <+59>:    cmp    eax,0x40                          # if $eax == 0x40 (64) ?
 //    0x080484e2 <+62>:    jne    0x8048518 <v+116>                 # if != jump leave
-//    0x080484e4 <+64>:    mov    eax,ds:0x8049880                  0x8049880 <stdout@@GLIBC_2.0>
+//    0x080484e4 <+64>:    mov    eax,ds:0x8049880                  # 0x8049880 <stdout@@GLIBC_2.0>
 //    0x080484e9 <+69>:    mov    edx,eax
 //    0x080484eb <+71>:    mov    eax,0x8048600                     # 0x8048600:       "Wait what?!\n"
 //    0x080484f0 <+76>:    mov    DWORD PTR [esp+0xc],edx
