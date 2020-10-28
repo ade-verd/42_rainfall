@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LEVEL="2"
+LEVEL="3"
 PREV_LEVEL=$(($LEVEL-1))
 NEXT_LEVEL=$(($LEVEL+1))
 
