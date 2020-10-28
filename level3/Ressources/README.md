@@ -125,7 +125,7 @@ We can see an offset of 4 between the printf argument (`0xbffff430`) and the rea
 AAAA.0x41414141
 ```
 
-The specifier `%4$p` prints the 4th address after the printf argument, which contains our buffer string
+The specifier `%4$p` prints the 4th address before the printf argument, which contains our buffer string
 
 But the goal is to replace the value of the global variable `m` with 0x40 (64).
 
