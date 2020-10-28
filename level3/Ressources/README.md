@@ -1,4 +1,4 @@
-# Level3 - Format string vulnerability - Basic write
+# Level3 - Format string vulnerability - Basic write short integer
 
 ## Local script usage
 
