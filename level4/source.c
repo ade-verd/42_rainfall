@@ -51,7 +51,7 @@ int main(void)
 //    0x08048485 <+46>:    mov    DWORD PTR [esp],eax
 //    0x08048488 <+49>:    call   0x8048444 <p>                 # call p()
 //    0x0804848d <+54>:    mov    eax,ds:0x8049810              # 0x8049810 <m>:  0x00000000
-//    0x08048492 <+59>:    cmp    eax,0x1025544                 # 0x1025544 = 16930116
+//    0x08048492 <+59>:    cmp    eax,0x1025544                 # compare 0x1025544 (16930116) and 0x8049810
 //    0x08048497 <+64>:    jne    0x80484a5 <n+78>
 //    0x08048499 <+66>:    mov    DWORD PTR [esp],0x8048590     # 0x8048590: "/bin/cat /home/user/level5/.pass"
 //    0x080484a0 <+73>:    call   0x8048360 <system@plt>        # call system()
