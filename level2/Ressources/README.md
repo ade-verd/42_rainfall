@@ -1,4 +1,4 @@
-# Level2 - Buffer overflow with protection against return address in stack memory
+# Level2 - Buffer overflow (gets) with protection against return address in stack memory
 
 ## Local script usage
 
