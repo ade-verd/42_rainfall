@@ -33,21 +33,43 @@ Lets debug the binary
 
 ```shell
 (gdb) info functions
-
-> (...)
-  0x08048454  n
-  0x08048468  m
-  0x0804847c  main
-  (...)
-```
-
-```shell
 gdb-peda$ pdisas main
-
 gdb-peda$ pdisas m
-
 gdb-peda$ pdisas n
 ```
+
+See our assembly interpretation in [source file](../source.c)
+
+```C
+void n(void)
+{
+    system("/bin/cat /home/user/level7/.pass");
+}
+
+void m(char *str)
+{
+    puts(str);
+}
+
+int main(int argc, char **argv)
+{
+    char *dest;
+    void *m_address;
+    void *arg;
+
+    dest = (void *)malloc(0x40);
+    m_address = (void *)malloc(0x4);
+    m_address = (void *)m;
+    arg = argv + 4;
+    strcpy(dest, arg);
+
+    ((void (*)(void))m_address)();
+}
+```
+
+It seems the function m in called through an address stored in a pointer.
+
+As `strcpy` is vulnerable, the idea is to use the vulnerability to overwrite the pointer `m_address`
 
 ---
 

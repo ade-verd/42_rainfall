@@ -5,10 +5,6 @@
 #include <string.h>
 #include <stdio.h>
 
-// void *malloc(size_t size);
-// char *strcpy(char *dest, const char *src);
-// int puts(const char *s);
-
 void n(void)
 {
     system("/bin/cat /home/user/level7/.pass");
