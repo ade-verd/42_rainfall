@@ -19,12 +19,6 @@ void v()
     }
 }
 
-int main(void)
-{
-    v();
-    return 0;
-}
-
 // main
 //    0x0804851a <+0>:     push   ebp
 //    0x0804851b <+1>:     mov    ebp,esp

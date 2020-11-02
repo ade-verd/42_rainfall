@@ -189,6 +189,8 @@ $ cat /home/user/level4/.pass
 
 - [Memory segmentation - Cheat sheet](https://www.0x0ff.info/wp-content/uploads/2015/12/buffer-overflow-memory-segmentation-cheat-sheet.png)
 
+- [gets vs fgets](https://iq.opengenus.org/gets-vs-fgets-in-c/#:~:text=depends%20on%20system-,gets()%20keeps%20reading%20input%20until%20newline%20character%20or%20end,of%20input%20characters%20is%20reached.)
+
 - [Format string attack - Introduction](https://owasp.org/www-community/attacks/Format_string_attack)
 - [Exploit 101 - Format Strings](https://axcheron.github.io/exploit-101-format-strings/)
 - [Exploiting Format String Vulnerabilities](https://cs155.stanford.edu/papers/formatstring-1.2.pdf)
