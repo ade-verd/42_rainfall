@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 //    0x080484f5 <+1>:     mov    ebp,esp
 //    0x080484f7 <+3>:     sub    esp,0x18
 //    0x080484fa <+6>:     mov    DWORD PTR [esp],0x0
-//    0x08048501 <+13>:    call   0x80483d0 <time@plt>              # sec =time(NULL)
+//    0x08048501 <+13>:    call   0x80483d0 <time@plt>              # sec =time(0)
 //    0x08048506 <+18>:    mov    edx,0x80486e0                     # 0x80486e0: "%s - %d\n"
 //    0x0804850b <+23>:    mov    DWORD PTR [esp+0x8],eax           # time() return
 //    0x0804850f <+27>:    mov    DWORD PTR [esp+0x4],0x8049960     # 0x8049960 <c>: 0x00

