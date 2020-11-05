@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 //    0x08048581 <+96>:    mov    eax,DWORD PTR [esp+0x18]
 //    0x08048585 <+100>:   mov    DWORD PTR [eax+0x4],edx           # s_arg2->ptr => last malloc
 //    0x08048588 <+103>:   mov    eax,DWORD PTR [ebp+0xc]           # ebp+0xc => (char**)argv
-//    0x0804858b <+106>:   add    eax,0x4                           # argv[1]
+//    0x0804858b <+106>:   add    eax,0x4                           # argv + 4 = argv[1]
 //    0x0804858e <+109>:   mov    eax,DWORD PTR [eax]
 //    0x08048590 <+111>:   mov    edx,eax
 //    0x08048592 <+113>:   mov    eax,DWORD PTR [esp+0x1c]          # s_arg1
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 //    0x0804859d <+124>:   mov    DWORD PTR [esp],eax               # s_arg1->ptr
 //    0x080485a0 <+127>:   call   0x80483e0 <strcpy@plt>            # strcpy(s_arg1->ptr, argv[1])
 //    0x080485a5 <+132>:   mov    eax,DWORD PTR [ebp+0xc]
-//    0x080485a8 <+135>:   add    eax,0x8                           # argv[2]
+//    0x080485a8 <+135>:   add    eax,0x8                           # argv + 8 = argv[2]
 //    0x080485ab <+138>:   mov    eax,DWORD PTR [eax]
 //    0x080485ad <+140>:   mov    edx,eax
 //    0x080485af <+142>:   mov    eax,DWORD PTR [esp+0x18]          # s_arg2
