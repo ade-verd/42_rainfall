@@ -37,6 +37,14 @@ Lets debug the binary
 
 See our assembly interpretation in [source file](../source.c)
 
+```
+objdump -t level8 | grep auth
+> 08049aac g     O .bss   00000004              auth
+objdump -t level8 | grep service
+> 08049ab0 g     O .bss   00000004              service
+
+```
+
 ---
 
 ## Sources
@@ -45,6 +53,10 @@ See our assembly interpretation in [source file](../source.c)
 
 - [Memory segmentation - Cheat sheet](https://www.0x0ff.info/wp-content/uploads/2015/12/buffer-overflow-memory-segmentation-cheat-sheet.png)
 - [FR - Buffer overflow](https://beta.hackndo.com/buffer-overflow/)
+
+### ASM
+
+- [What do the assembly instructions 'seta' and 'setb' do after repz cmpsb?](https://stackoverflow.com/questions/44630262/what-do-the-assembly-instructions-seta-and-setb-do-after-repz-cmpsb/44630741)
 
 ### Shell
 

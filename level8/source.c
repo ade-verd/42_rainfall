@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 
 // void *malloc(size_t size);
 // void free(void *ptr);
@@ -15,51 +16,87 @@
 // char *strdup(const char *s);
 // int system(const char *command);
 
+char *auth = NULL;
+char *service = NULL;
+
 int main(int argc, char **argv)
 {
-    printf();
-    fgets();
-    malloc();
-    strcpy();
-    free();
-    strdup();
-    system();
-    fwrite();
+    char buf[0x80];
+    char *esi;
+    char *edi;
+    int dl;
+    int al;
+    int ecx;
+
+    __asm("JMP .+0x3");
+    while ()
+    {
+        __asm("NOP");
+        printf("%p, %p \n", auth, service);
+        if (!fgets(buf, 0x80, stdin))
+        {
+            __asm("NOP");
+            return 0;
+        }
+        esi = &buf;
+        edi = "auth ";
+        ecx = 0x5;
+        // repz cmps BYTE PTR [rsi], BYTE PTR [rdi]
+        while (*esi == *edi && ecx > 0)
+        {
+            esi++;
+            edi++;
+            ecx--;
+        }
+        dl = *esi > *edi; // seta dl
+        al = *esi < *edi; // setb al
+        // ????
+        if (!= 0)
+        {
+        }
+        fwrite("Password:\n", 0x1, 0xa, stdout);
+    }
+
+    // malloc();
+    // strcpy();
+    // free();
+    // strdup();
+    // system();
 }
 
 // main
-//    0x08048564 <+0>:	push   ebp
-//    0x08048565 <+1>:	mov    ebp,esp
-//    0x08048567 <+3>:	push   edi
-//    0x08048568 <+4>:	push   esi
-//    0x08048569 <+5>:	and    esp,0xfffffff0
-//    0x0804856c <+8>:	sub    esp,0xa0
-//    0x08048572 <+14>:	jmp    0x8048575 <main+17>
-//    0x08048574 <+16>:	nop
-//    0x08048575 <+17>:	mov    ecx,DWORD PTR ds:0x8049ab0
-//    0x0804857b <+23>:	mov    edx,DWORD PTR ds:0x8049aac
-//    0x08048581 <+29>:	mov    eax,0x8048810
-//    0x08048586 <+34>:	mov    DWORD PTR [esp+0x8],ecx
-//    0x0804858a <+38>:	mov    DWORD PTR [esp+0x4],edx
-//    0x0804858e <+42>:	mov    DWORD PTR [esp],eax
-//    0x08048591 <+45>:	call   0x8048410 <printf@plt>                       # printf()
-//    0x08048596 <+50>:	mov    eax,ds:0x8049a80
-//    0x0804859b <+55>:	mov    DWORD PTR [esp+0x8],eax
-//    0x0804859f <+59>:	mov    DWORD PTR [esp+0x4],0x80
-//    0x080485a7 <+67>:	lea    eax,[esp+0x20]
-//    0x080485ab <+71>:	mov    DWORD PTR [esp],eax
-//    0x080485ae <+74>:	call   0x8048440 <fgets@plt>                        # fgets()
-//    0x080485b3 <+79>:	test   eax,eax
-//    0x080485b5 <+81>:	je     0x804872c <main+456>
-//    0x080485bb <+87>:	lea    eax,[esp+0x20]
-//    0x080485bf <+91>:	mov    edx,eax
-//    0x080485c1 <+93>:	mov    eax,0x8048819
-//    0x080485c6 <+98>:	mov    ecx,0x5
+//    0x08048564 <+0>:	    push   ebp
+//    0x08048565 <+1>:	    mov    ebp,esp
+//    0x08048567 <+3>:	    push   edi
+//    0x08048568 <+4>:	    push   esi
+//    0x08048569 <+5>:	    and    esp,0xfffffff0
+//    0x0804856c <+8>:	    sub    esp,0xa0
+//    0x08048572 <+14>:	    jmp    0x8048575 <main+17>
+//    0x08048574 <+16>:	    nop
+//    0x08048575 <+17>:	    mov    ecx,DWORD PTR ds:0x8049ab0                   # 0x8049ab0 <service>: ""
+//    0x0804857b <+23>:	    mov    edx,DWORD PTR ds:0x8049aac                   # 0x8049aac <auth>: ""
+//    0x08048581 <+29>:	    mov    eax,0x8048810                                # 0x8048810: "%p, %p \n"
+//    0x08048586 <+34>:	    mov    DWORD PTR [esp+0x8],ecx
+//    0x0804858a <+38>:	    mov    DWORD PTR [esp+0x4],edx
+//    0x0804858e <+42>:	    mov    DWORD PTR [esp],eax
+//    0x08048591 <+45>:	    call   0x8048410 <printf@plt>                       # printf("%p, %p \n", auth, service);
+//    0x08048596 <+50>:	    mov    eax,ds:0x8049a80                             # 0x8049a80 <stdin@@GLIBC_2.0>
+//    0x0804859b <+55>:	    mov    DWORD PTR [esp+0x8],eax
+//    0x0804859f <+59>:	    mov    DWORD PTR [esp+0x4],0x80
+//    0x080485a7 <+67>:	    lea    eax,[esp+0x20]                               # esp+0x20 -> 0xbffff5d0 -> buf
+//    0x080485ab <+71>:	    mov    DWORD PTR [esp],eax
+//    0x080485ae <+74>:	    call   0x8048440 <fgets@plt>                        # fgets(&buf, 0x80, stdin);
+//    0x080485b3 <+79>:	    test   eax,eax                                      # = cmp eax, 0
+//    0x080485b5 <+81>:	    je     0x804872c <main+456>                         # if == 0 -> goto main+456
+//    0x080485bb <+87>:	    lea    eax,[esp+0x20]
+//    0x080485bf <+91>:	    mov    edx,eax
+//    0x080485c1 <+93>:	    mov    eax,0x8048819                                # 0x8048819: "auth "
+//    0x080485c6 <+98>:	    mov    ecx,0x5
 //    0x080485cb <+103>:	mov    esi,edx
 //    0x080485cd <+105>:	mov    edi,eax
-//    0x080485cf <+107>:	repz cmps BYTE PTR ds:[esi],BYTE PTR es:[edi]
-//    0x080485d1 <+109>:	seta   dl
-//    0x080485d4 <+112>:	setb   al
+//    0x080485cf <+107>:	repz cmps BYTE PTR ds:[esi],BYTE PTR es:[edi]       # Compare strings while the strings compare equal
+//    0x080485d1 <+109>:	seta   dl                                           # Set dl to 1 if the above flag is set, or dl to 0 if not
+//    0x080485d4 <+112>:	setb   al                                           # Set al to 1 if the below flag is set, or al to 0 if not
 //    0x080485d7 <+115>:	mov    ecx,edx
 //    0x080485d9 <+117>:	sub    cl,al
 //    0x080485db <+119>:	mov    eax,ecx
@@ -150,14 +187,14 @@ int main(int argc, char **argv)
 //    0x080486ee <+394>:	mov    DWORD PTR [esp],0x8048833
 //    0x080486f5 <+401>:	call   0x8048480 <system@plt>                   # system()
 //    0x080486fa <+406>:	jmp    0x8048574 <main+16>
-//    0x080486ff <+411>:	mov    eax,ds:0x8049aa0
+//    0x080486ff <+411>:	mov    eax,ds:0x8049aa0                         # 0x8049aa0 <stdout@@GLIBC_2.0>
 //    0x08048704 <+416>:	mov    edx,eax
-//    0x08048706 <+418>:	mov    eax,0x804883b
+//    0x08048706 <+418>:	mov    eax,0x804883b                            # 0x804883b: "Password:\n"
 //    0x0804870b <+423>:	mov    DWORD PTR [esp+0xc],edx
 //    0x0804870f <+427>:	mov    DWORD PTR [esp+0x8],0xa
 //    0x08048717 <+435>:	mov    DWORD PTR [esp+0x4],0x1
 //    0x0804871f <+443>:	mov    DWORD PTR [esp],eax
-//    0x08048722 <+446>:	call   0x8048450 <fwrite@plt>                   # fwrite()
+//    0x08048722 <+446>:	call   0x8048450 <fwrite@plt>                   # fwrite("Password:\n", 0x1, 0xa, stdout)
 //    0x08048727 <+451>:	jmp    0x8048574 <main+16>
 //    0x0804872c <+456>:	nop
 //    0x0804872d <+457>:	mov    eax,0x0
