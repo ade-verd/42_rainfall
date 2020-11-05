@@ -1,4 +1,4 @@
-# Level7 -
+# Level7 - strcpy buffer overflow - code redirection
 
 ## Local script usage
 
