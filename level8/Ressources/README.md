@@ -57,7 +57,9 @@ objdump -t level8 | grep service
 ### ASM
 
 - [What do the assembly instructions 'seta' and 'setb' do after repz cmpsb?](https://stackoverflow.com/questions/44630262/what-do-the-assembly-instructions-seta-and-setb-do-after-repz-cmpsb/44630741)
+- [REPNZ SCAS Assembly Instruction Specifics](https://stackoverflow.com/questions/26783797/repnz-scas-assembly-instruction-specifics)
 - [x86 Registers](https://www.eecg.utoronto.ca/~amza/www.mindsec.com/files/x86regs.html)
+- [x86 Instruction Set Reference - REP/REPE/REPZ/REPNE/REPNZ](https://c9x.me/x86/html/file_module_x86_id_279.html)
 
 ### Shell
 
