@@ -40,7 +40,11 @@ Lets debug the binary
 See our assembly interpretation in [source file](../source.c)
 
 ```shell
-
+gdb-peda$ pset arg cyclic_pattern(200)
+gdb-peda$ run
+gdb-peda$ pattern search
+> Registers contain pattern buffer:
+  EAX+0 found at offset: 108
 ```
 
 Finally we can get the pass !
@@ -58,12 +62,9 @@ $ cat /home/user/bonus0/.pass
 
 ### ASM
 
-- [What do the assembly instructions 'seta' and 'setb' do after repz cmpsb?](https://stackoverflow.com/questions/44630262/what-do-the-assembly-instructions-seta-and-setb-do-after-repz-cmpsb/44630741)
-- [REPNZ SCAS Assembly Instruction Specifics](https://stackoverflow.com/questions/26783797/repnz-scas-assembly-instruction-specifics)
-- [x86 Registers](https://www.eecg.utoronto.ca/~amza/www.mindsec.com/files/x86regs.html)
-- [x86 Instruction Set Reference - REP/REPE/REPZ/REPNE/REPNZ](https://c9x.me/x86/html/file_module_x86_id_279.html)
+- [What is operator new(unsigned int)? - \_Znwj](https://reverseengineering.stackexchange.com/questions/4402/what-is-operator-newunsigned-int)
 
 ### CPP
 
-- [The Secret Life of C++: Objects - \_Znwj](http://web.mit.edu/tibbetts/Public/inside-c/www/objects.html)
 - [Man \_Exit](https://en.cppreference.com/w/cpp/utility/program/_Exit)
+- [Man memcpy](http://www.cplusplus.com/reference/cstring/memcpy/)
