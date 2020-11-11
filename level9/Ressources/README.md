@@ -11,7 +11,7 @@ Usage: ./main.sh
 |        |                                                                    |
 | ------ | ------------------------------------------------------------------ |
 | level9 | `c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a` |
-| bonus0 | ``                                                                 |
+| bonus0 | `f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728` |
 
 ## Steps to resolve on VM
 
@@ -53,7 +53,7 @@ Finally we can get the pass !
 $ whoami
 > bonus0
 $ cat /home/user/bonus0/.pass
->
+> f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728
 ```
 
 ---
