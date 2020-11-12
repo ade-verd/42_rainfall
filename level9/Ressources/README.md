@@ -17,7 +17,7 @@ Usage: ./main.sh
 
 Note: We will use `gdb-peda`. You can setup peda with the script: [scripts/installPeda.sh](../../scripts/installPeda.sh)
 
-Execute level8
+Execute level9
 
 ```shell
 ./level9
