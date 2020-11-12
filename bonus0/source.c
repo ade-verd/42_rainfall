@@ -7,7 +7,7 @@
 
 void p(char *str, char *prompt)
 {
-    char buf[4096];
+    char buf[4116];
     char *s;
 
     puts(prompt);          // int puts(const char *s);
@@ -33,7 +33,7 @@ void pp(char *str)
 
 int main(int argc, char **argv)
 {
-    char str[42];
+    char str[40];
 
     pp(str);
     puts(str); // int puts(const char *s);
