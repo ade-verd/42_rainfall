@@ -7,10 +7,11 @@
 class N
 {
 
-public:
+private:
     char annotation[104];
-    int nb = 0;
+    int nb;
 
+public:
     // constructor
     N(int n)
     {
@@ -19,7 +20,7 @@ public:
 
     int operator+(const N &inst)
     {
-        return N(this->nb + inst.nb);
+        return this->nb + inst.nb;
     }
 
     int operator-(const N &inst)
@@ -44,9 +45,20 @@ int main(int argc, char **argv)
     a->setAnnotation(argv[1]);
     // (...)
     // return edx(a, b);
+    return (a + b); // using N::operator+(N&)
 }
 
-// _ZN1N13setAnnotationEPc
+// _ZN1NplERS_ => N::operator+(N&) ()
+//    0x0804873a <+0>:	push   ebp
+//    0x0804873b <+1>:	mov    ebp,esp
+//    0x0804873d <+3>:	mov    eax,DWORD PTR [ebp+0x8]                  # arg[0] => *b
+//    0x08048740 <+6>:	mov    edx,DWORD PTR [eax+0x68]                 # b->nb => 6
+//    0x08048743 <+9>:	mov    eax,DWORD PTR [ebp+0xc]                  # arg[1] => *a
+//    0x08048746 <+12>:	mov    eax,DWORD PTR [eax+0x68]                 # a->nb => 5
+//    0x08048749 <+15>:	add    eax,edx                                  # a->nb + b->nb
+//    0x0804874b <+17>:	pop    ebp
+
+// _ZN1N13setAnnotationEPc => N::setAnnotation(char*)
 //    0x0804870e <+0>:	push   ebp
 //    0x0804870f <+1>:	mov    ebp,esp
 //    0x08048711 <+3>:	sub    esp,0x18
@@ -63,7 +75,7 @@ int main(int argc, char **argv)
 //    0x08048738 <+42>:	leave
 //    0x08048739 <+43>:	ret
 
-// _ZN1NC2Ei
+// _ZN1NC2Ei => N::N(int)
 //    0x080486f6 <+0>:	    push   ebp
 //    0x080486f7 <+1>:	    mov    ebp,esp
 //    0x080486f9 <+3>:	    mov    eax,DWORD PTR [ebp+0x8]              # arg[0] => &b
@@ -73,21 +85,6 @@ int main(int argc, char **argv)
 //    0x08048708 <+18>:	    mov    DWORD PTR [eax+0x68],edx
 //    0x0804870b <+21>:	    pop    ebp
 //    0x0804870c <+22>:	    ret
-
-// _ZN1NplERS_
-//    0x0804873a <+0>:	push   ebp
-//    0x0804873b <+1>:	mov    ebp,esp
-//    0x0804873d <+3>:	mov    eax,DWORD PTR [ebp+0x8]                  # arg[0]
-//    0x08048740 <+6>:	mov    edx,DWORD PTR [eax+0x68]                 #
-//    0x08048743 <+9>:	mov    eax,DWORD PTR [ebp+0xc]                  # arg[1]
-//    0x08048746 <+12>:	mov    eax,DWORD PTR [eax+0x68]
-//    0x08048749 <+15>:	add    eax,edx
-//    0x0804874b <+17>:	pop    ebp
-
-// _Znwj
-//    0x08048530 <+0>:	    jmp    DWORD PTR ds:0x8049b70
-//    0x08048536 <+6>:	    push   0x40
-//    0x0804853b <+11>: 	jmp    0x80484a0
 
 // main
 //    0x080485f4 <+0>:     push   ebp
@@ -100,14 +97,14 @@ int main(int argc, char **argv)
 //    0x08048604 <+16>:    mov    DWORD PTR [esp],0x1
 //    0x0804860b <+23>:    call   0x80484f0 <_exit@plt>                 # _exit()
 //    0x08048610 <+28>:    mov    DWORD PTR [esp],0x6c                  # Allocate 108 bytes (104 + 4)
-//    0x08048617 <+35>:	   call   0x8048530 <_Znwj@plt>                 # _Znwj => new instance of N-class => new N()
+//    0x08048617 <+35>:	   call   0x8048530 <_Znwj@plt>                 # _Znwj => operator new
 //    0x0804861c <+40>:    mov    ebx,eax                               # &a => 0x804a008
 //    0x0804861e <+42>:    mov    DWORD PTR [esp+0x4],0x5
 //    0x08048626 <+50>:    mov    DWORD PTR [esp],ebx
 //    0x08048629 <+53>:    call   0x80486f6 <_ZN1NC2Ei>                 # N *a = new N(0x5)
 //    0x0804862e <+58>:    mov    DWORD PTR [esp+0x1c],ebx              # a
 //    0x08048632 <+62>:    mov    DWORD PTR [esp],0x6c                  # Allocate 108 bytes
-//    0x08048639 <+69>:    call   0x8048530 <_Znwj@plt>                 # _Znwj => new instance of N-class => new N()
+//    0x08048639 <+69>:    call   0x8048530 <_Znwj@plt>                 # _Znwj => operator new
 //    0x0804863e <+74>:    mov    ebx,eax                               # b => 0x804a078
 //    0x08048640 <+76>:    mov    DWORD PTR [esp+0x4],0x6
 //    0x08048648 <+84>:    mov    DWORD PTR [esp],ebx
@@ -126,7 +123,7 @@ int main(int argc, char **argv)
 //    0x08048677 <+131>:   call   0x804870e <_ZN1N13setAnnotationEPc>   # a.setAnnotation(argv[1]);
 //    0x0804867c <+136>:   mov    eax,DWORD PTR [esp+0x10]              # eax, &b
 //    0x08048680 <+140>:   mov    eax,DWORD PTR [eax]
-//    0x08048682 <+142>:   mov    edx,DWORD PTR [eax]                   # 0x804873a (<_ZN1NplERS_>:	push   ebp)
+//    0x08048682 <+142>:   mov    edx,DWORD PTR [eax]                   # 0x8048848 => 0x804873a (<_ZN1NplERS_>:	push   ebp) => N::operator+(N&) ()
 //    0x08048684 <+144>:   mov    eax,DWORD PTR [esp+0x14]              # eax, &a
 //    0x08048688 <+148>:   mov    DWORD PTR [esp+0x4],eax
 //    0x0804868c <+152>:   mov    eax,DWORD PTR [esp+0x10]
