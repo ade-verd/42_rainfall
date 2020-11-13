@@ -15,6 +15,7 @@ if [ -z ${RF_PORT+x} ]; then read -p "VM Port: " RF_PORT; fi
 # Connect to level and run the script
 echo -e "$USER password is: $PASS\n"
 (set -x
+scp -q -P $RF_PORT $CURDIR/getenv.c $USER@$RF_HOST:/tmp/getenv.c
 ssh -q -p $RF_PORT $USER@$RF_HOST 'bash' < $CURDIR/script.sh)
 
 # Check flag password and token

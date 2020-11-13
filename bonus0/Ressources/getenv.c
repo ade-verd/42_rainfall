@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     ptr = getenv(argv[1]);
     ptr += strlen(argv[0]) - strlen(argv[2]);
 
-    printf("%s found at %p\n", argv[1], ptr);
+    printf("%p", ptr);
 
     return EXIT_SUCCESS;
 }
