@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 gcc /tmp/getenv.c -o /tmp/getenv
 
 function buildExploit {
