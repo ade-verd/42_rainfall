@@ -27,7 +27,22 @@ See our assembly interpretation in [source file](../source.c)
 
 That is an easy one.
 
+To be able to exec the shell, the readed buffer and the first argument have to be equals.
+
+The first argument is converted as integer with `atoi`. This number ends the buffer with a NULL character at this number index.
+
 We just have to put an empty string as argument.
+
+```shell
+  argv[1] = ""
+
+=> n = atoi(argv[1]) = 0
+=> buf[n] = '\0'
+
+=> strcmp(buf, argv[1]) == 0
+```
+
+We can get the last pass !
 
 ```shell
 ~/bonus3 ""
