@@ -1,4 +1,4 @@
-# Bonus3 -
+# Bonus3 - An easy one
 
 ## Local script usage
 
