@@ -51,7 +51,7 @@ typedef struct s_struct
     void *ptr;
 } t_struct;
 
-void m(char *str)
+void m(void)
 {
     time_t seconds;
 
@@ -138,6 +138,7 @@ We have below the situation, just before the first strcpy. Lets move on.
 
 ```shell
 gdb-peda$ nexti
+# After 1st strcpy
 > 0x804a000: 0x00000000 0x00000011 0x00000001 0x0804a018
                                      ┌─────────────────┤
   0x804a010: 0x00000000 0x00000011 0x41414141 0x41414141
@@ -169,7 +170,7 @@ arg[1]: 0xbffff841 ("BBBBBBBB")
 
 gdb-peda$ nexti
 
-# After 1st strcpy
+# After 2nd strcpy
 gdb-peda$ x/20x 0x804a000
 > 0x804a000: 0x00000000 0x00000011 0x00000001 0x0804a018
                                      ┌─────────────────┤

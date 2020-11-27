@@ -53,7 +53,7 @@ gdb-peda$ p/d0x28
   $3 = 40
 ```
 
-It means there is 40 bits between them.
+It means there is 40 bytes between them.
 Unfortunately, we can not write directly more than 36 bytes (9 \* 4) in `memcpy`.
 
 To overwrite the number, we have to write 40 characters + 4 bits for the value `0x574f4c46` => 44 bits.

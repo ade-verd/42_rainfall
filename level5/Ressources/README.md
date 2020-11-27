@@ -69,7 +69,7 @@ n() calls exit(1) at the end of his routine. It means that we never return to ma
 
 Basically, when the program is executed, the GOT (Global Offset Table) is initialized for every external functions (like libc functions). By doing so, the executable will cache the memory address in the GOT, so that it doesn’t have to ask libc each time an external function is called.
 
-The goal here will be to overwrite the address of exit() in the GOT with the address of hello(). There are 4 steps here :
+The goal here will be to overwrite the address of exit() in the GOT with the address of o(). There are 4 steps here :
 
 - Find the address of o()
 - Find the address of exit() in GOT

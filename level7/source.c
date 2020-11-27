@@ -14,7 +14,7 @@ typedef struct s_struct
     void *ptr;
 } t_struct;
 
-void m(char *str)
+void m()
 {
     time_t seconds;
 

