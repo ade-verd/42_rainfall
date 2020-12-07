@@ -3,7 +3,7 @@
 ## Local script usage
 
 ```shell
-Usage: ./main.sh
+Usage: ./Ressources/main.sh
 ```
 
 ## Passwords and token
